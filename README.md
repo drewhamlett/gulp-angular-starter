@@ -15,3 +15,8 @@
 - ```gulp bower``` - Inject Bower dependencies to Karma
 - ```gulp build``` - Compile assets and Angular templates to build folder
 
+
+## Angular dependencies
+ - Angular UI (Bootstrap)
+ - Restangular
+ - Bindonce
