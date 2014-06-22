@@ -1,0 +1,27 @@
+{
+  "name": "gulp-angular-starter",
+  "version": "0.0.1",
+  "homepage": "",
+  "authors": [
+    "Drew Hamlett <i@drewh.me>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.2.18",
+    "angular-route": "~1.2.18",
+    "restangular": "~1.4.0",
+    "bootstrap": "~3.1.1",
+    "angular-bootstrap": "~0.11.0",
+    "angular-bindonce": "~0.3.1"
+  },
+  "devDependencies": {
+    "angular-mocks": "~1.2.18"
+  }
+}
