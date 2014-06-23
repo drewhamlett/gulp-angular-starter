@@ -14,43 +14,69 @@ var config = {
 };
 
 gulp.task('usemin', function () {
-
     return gulp.src('./app/index.html')
-        .pipe($.usemin({
-            css: [$.minifyCss(), 'concat', $.rev()],
-            js: [$.ngmin(), $.uglify(), $.rev()],
-            vendor: [$.uglify(), $.rev()]
+        .pipe($.spa.html({
+            assetsDir: 'app/',
+            pipelines: {
+                main: function (files) {
+                    return files.pipe($.minifyHtml({
+                        quotes: true
+                    }));
+                },
+                js: function (files) {
+
+                    var jsFiles = function () {
+                        return gulp.src('./app/assets/js/**/*.js')
+                            .pipe($.ngmin())
+                    };
+
+                    var angularTemplates = function () {
+                        return gulp.src('./app/assets/partials/**/*.html')
+                            .pipe($.minifyHtml({
+                                quotes: true
+                            }))
+                            .pipe($.angularTemplatecache({
+                                root: 'assets/partials/',
+                                module: config.appName // has to be the name of angular app
+                            }));
+                    };
+
+                    return es.concat(jsFiles(), angularTemplates())
+                        .pipe($.concat('app.js'))
+                        .pipe($.uglify())
+                        .pipe($.rev());
+
+                },
+                css: function (files) {
+                    return files
+                        .pipe($.minifyCss())
+                        .pipe($.concat('app.css'))
+                        .pipe($.rev());
+                },
+                vendor: function (files) {
+                    return files
+                        .pipe($.concat('vendor.js'))
+                        .pipe($.uglify())
+                        .pipe($.rev());
+                }
+            }
         }))
-        .pipe(gulp.dest(config.dist));
+        .pipe(gulp.dest('./build'));
 });
 
 
-gulp.task('templates', function () {
-    return gulp.src('./app/assets/partials/**/*.html')
-        .pipe($.minifyHtml({
-            quotes: true
-        }))
-        .pipe($.angularTemplatecache({
-            root: 'assets/partials/',
-            module: config.appName // has to be the name of angular app
-        }))
-        .pipe($.rev())
-        .pipe(gulp.dest(config.dist));
-});
-
-gulp.task('inject', function () {
-
-    return gulp.src(config.dist + 'index.html')
-        .pipe($.inject(
-            gulp.src([config.dist + 'templates*'], {
-                read: false,
-            }), {
-                ignorePath: config.dist,
-                addRootSlash: false
-            }))
-        .pipe(gulp.dest(config.dist));
-});
-
+// Optional Manifest file
+// gulp.task('manifest', function () {
+//     gulp.src(['build/*'])
+//         .pipe($.manifest({
+//             hash: true,
+//             preferOnline: true,
+//             network: ['http://*', 'https://*', '*'],
+//             filename: 'app.manifest',
+//             exclude: ['app.manifest', 'index.html']
+//         }))
+//         .pipe(gulp.dest('build'));
+// });
 
 gulp.task('connect', function () {
     $.connect.server({
@@ -147,9 +173,7 @@ gulp.task('build', function () {
 
     runSequence(
         'clean',
-        ['usemin', 'templates'],
-        'inject',
-        'minify-html',
+        'usemin',
         function () {
             $.util.log('Build complete');
         });
